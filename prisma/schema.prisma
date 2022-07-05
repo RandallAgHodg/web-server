@@ -1,0 +1,103 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Employee {
+  id        Int      @id @default(autoincrement())
+  firstname String
+  lastname  String
+  cellphone String
+  gender    Gender
+  role      Role
+  state     Boolean  @default(false)
+  createdAt DateTime
+  client    Client?
+}
+
+model Client {
+  id              Int      @id @default(autoincrement())
+  firstname       String
+  lastname        String
+  enterprise_name String
+  cellphone       String
+  gender          Gender
+  state           Boolean  @default(false)
+  employee        Employee @relation(fields: [employeeId], references: [id])
+  employeeId      Int      @unique
+  createdAt       DateTime
+}
+
+model Provider {
+  id              Int      @id @default(autoincrement())
+  firstname       String
+  lastname        String
+  enterprise_name String
+  cellphone       String
+  gender          Gender
+  state           Boolean  @default(false)
+  createdAt       DateTime
+  product         Product?
+}
+
+model Product {
+  id          Int      @id @default(autoincrement())
+  name        String
+  stock       Int
+  price       Float
+  image       String
+  description String
+  state       Boolean  @default(false)
+  provider    Provider @relation(fields: [providerId], references: [id])
+  providerId  Int      @unique
+}
+
+model Purchase {
+  id           Int          @id @default(autoincrement())
+  total        Float
+  state        Boolean      @default(false)
+  order_status Order_status
+  createdAt    DateTime
+  detail       Json
+}
+
+model Refund {
+  id           Int          @id @default(autoincrement())
+  total        Float
+  state        Boolean      @default(false)
+  order_status Order_status
+  createdAt    DateTime
+  detail       Json
+}
+
+model Sales {
+  id           Int          @id @default(autoincrement())
+  total        Float
+  state        Boolean      @default(false)
+  order_status Order_status
+  createdAt    DateTime
+  detail       Json
+}
+
+enum Role {
+  ADMIN
+  EMPLOYEE
+}
+
+enum Gender {
+  MALE
+  FEMALE
+}
+
+enum Order_status {
+  PENDING
+  CLOMPETE
+  FAILED
+}
