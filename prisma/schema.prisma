@@ -14,12 +14,15 @@ model Employee {
   id        Int      @id @default(autoincrement())
   firstname String
   lastname  String
+  email     String   @unique
+  password  String
   cellphone String
   gender    Gender
-  role      Role
-  state     Boolean  @default(false)
+  role      Role?
+  state     Boolean  @default(true)
   createdAt DateTime
-  client    Client?
+  client    Client[]
+  Sale      Sale[]
 }
 
 model Client {
@@ -29,61 +32,88 @@ model Client {
   enterprise_name String
   cellphone       String
   gender          Gender
-  state           Boolean  @default(false)
+  state           Boolean  @default(true)
   employee        Employee @relation(fields: [employeeId], references: [id])
-  employeeId      Int      @unique
+  employeeId      Int
   createdAt       DateTime
+  sales           Sale[]
 }
 
 model Provider {
-  id              Int      @id @default(autoincrement())
+  id              Int              @id @default(autoincrement())
   firstname       String
   lastname        String
   enterprise_name String
   cellphone       String
   gender          Gender
-  state           Boolean  @default(false)
+  state           Boolean          @default(true)
   createdAt       DateTime
-  product         Product?
+  product         Product[]
+  detailPurchase  DetailPurchase[]
 }
 
 model Product {
-  id          Int      @id @default(autoincrement())
-  name        String
-  stock       Int
-  price       Float
-  image       String
-  description String
-  state       Boolean  @default(false)
-  provider    Provider @relation(fields: [providerId], references: [id])
-  providerId  Int      @unique
+  id             Int              @id @default(autoincrement())
+  name           String
+  stock          Int              @default(0)
+  price          Float
+  image          String
+  image_id       String
+  description    String
+  state          Boolean          @default(true)
+  createdAt      DateTime
+  provider       Provider?        @relation(fields: [providerId], references: [id])
+  providerId     Int?
+  detailPurchase DetailPurchase[]
+  detailSale     DetailSales[]
 }
 
 model Purchase {
-  id           Int          @id @default(autoincrement())
-  total        Float
-  state        Boolean      @default(false)
-  order_status Order_status
-  createdAt    DateTime
-  detail       Json
+  id             Int              @id @default(autoincrement())
+  total          Float
+  state          Boolean          @default(true)
+  detailPurchase DetailPurchase[]
+  createdAt      DateTime
 }
 
-model Refund {
-  id           Int          @id @default(autoincrement())
-  total        Float
-  state        Boolean      @default(false)
-  order_status Order_status
-  createdAt    DateTime
-  detail       Json
+model DetailPurchase {
+  id         Int      @id @default(autoincrement())
+  ammount    Int
+  price      Float
+  subtotal   Float
+  state      Boolean
+  createdAt  DateTime
+  product    Product  @relation(fields: [productId], references: [id])
+  productId  Int
+  provider   Provider @relation(fields: [providerId], references: [id])
+  providerId Int
+  purchase   Purchase @relation(fields: [purchaseId], references: [id], onDelete: Cascade)
+  purchaseId Int
 }
 
-model Sales {
-  id           Int          @id @default(autoincrement())
-  total        Float
-  state        Boolean      @default(false)
-  order_status Order_status
-  createdAt    DateTime
-  detail       Json
+model Sale {
+  id          Int           @id @default(autoincrement())
+  total       Float
+  state       Boolean       @default(true)
+  DetailSales DetailSales[]
+  createdAt   DateTime
+  client      Client        @relation(fields: [clientId], references: [id])
+  clientId    Int
+  employee    Employee      @relation(fields: [employeeId], references: [id])
+  employeeId  Int
+}
+
+model DetailSales {
+  id        Int      @id @default(autoincrement())
+  ammount   Int
+  price     Float
+  subtotal  Float
+  state     Boolean
+  createdAt DateTime
+  product   Product  @relation(fields: [productId], references: [id])
+  productId Int
+  sale      Sale     @relation(fields: [saleId], references: [id], onDelete: Cascade)
+  saleId    Int
 }
 
 enum Role {
@@ -94,10 +124,4 @@ enum Role {
 enum Gender {
   MALE
   FEMALE
-}
-
-enum Order_status {
-  PENDING
-  CLOMPETE
-  FAILED
 }
